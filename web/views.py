@@ -2,7 +2,7 @@ import json
 import traceback
 
 from django.core import mail
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views import View
 
@@ -89,6 +89,9 @@ class IndexView(View):
 
 
 class MailView(View):
+    def get(self, request):
+        return redirect('/')
+
     def post(self, request):
         data = request.POST
 
@@ -103,8 +106,6 @@ class MailView(View):
 
             if name and phone and tariff_id in range(1, len(tariffs) + 1):
                 tariff = [element for element in tariffs if element['number'] == tariff_id][0]
-
-                print(name, phone, tariff_id, tariff)
 
                 connection = mail.get_connection()
                 connection.open()
@@ -136,10 +137,8 @@ class MailView(View):
         except (BaseException, Exception):
             traceback.print_exc()
 
-        print(message)
-
         return render(request, 'index.html', {
-            'message': f'<div class="backend-message">{message}</div',
+            'message': message,
             'tariffs': json.dumps(DATA['tariffs'], ensure_ascii=False),
             **DATA['meta']
         })

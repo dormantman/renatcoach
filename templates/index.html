@@ -68,6 +68,13 @@
         <a data-to="contacts" class="tab close-menu">Контакты</a>
     </div>
 </div>
+<div id="backend-message" class="message-container">
+    <div class="container">
+        <div class="title">Новое сообщение</div>
+        <div id="message-body" class="message"></div>
+        <div id="close-message" class="button">Закрыть</div>
+    </div>
+</div>
 <div id="main" class="main-container">
     <div class="header">
         <div class="logo">Renat Coach</div>
@@ -783,10 +790,10 @@
                 <label for="phone" style="display: none"></label>
                 <label for="tariff" style="display: none"></label>
                 <div class="input input-name">
-                    <input id="name" name="name" type="text" placeholder="Ваше имя" value="Руслан">
+                    <input id="name" name="name" type="text" placeholder="Ваше имя">
                 </div>
                 <div class="input input-name">
-                    <input id="phone" name="phone" type="text" placeholder="Ваш телефон" value="88005553535">
+                    <input id="phone" name="phone" type="text" placeholder="Ваш телефон">
                 </div>
                 <div class="input input-name">
                     <select id="tariff" name="tariff" class="select-css">
@@ -872,7 +879,14 @@
     };
 
     const coords = JSON.parse(JSON.parse(document.getElementById('address-coords-data').textContent));
+    const message = "{{ message }}";
     let tariffs = JSON.parse(JSON.parse(document.getElementById('tariffs-data').textContent));
+
+    if (message) {
+        document.getElementById('backend-message').style.display = 'flex';
+        document.getElementById('message-body').innerHTML = message;
+        document.body.style.overflowY = 'hidden';
+    }
 
     function switchMenu() {
         const mobileMenuElement = document.getElementById('mobile-menu');
@@ -1038,6 +1052,11 @@
     function submitForm() {
         if (isFormValid) document.getElementById('mail-form').submit();
     }
+
+    document.getElementById('close-message').addEventListener('click', () => {
+        document.getElementById('backend-message').style.display = 'none';
+        document.body.style.overflowY = 'auto';
+    });
 
     document.getElementById('name').addEventListener('input', () => checkFormValid());
     document.getElementById('phone').addEventListener('input', () => checkFormValid());

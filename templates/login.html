@@ -1,0 +1,138 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="{{ meta_theme_color }}">
+    <meta name="application-name" content="{{ meta_site_title }}">
+    <meta name="apple-mobile-web-app-title" content="{{ meta_site_title }}">
+    <meta property="og:title" content="{{ meta_site_title }}">
+    <meta property="og:url">
+    <meta property="og:description" content="{{ meta_site_description }}">
+    <meta property="og:image" content="{{ meta_image }}">
+    <meta name="msapplication-config" content="none"/>
+    <link rel="shortcut icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="apple-touch-icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{ meta_favicon }}"/>
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=60445215-6d3a-4f88-87fe-8d52b72e5bc9"
+            type="text/javascript">
+    </script>
+
+    <title>{{ title }}</title>
+
+    <link rel="stylesheet" type="text/css" href="/static/login.css"/>
+
+    {% endblock head %}
+</head>
+<body>
+{% block main %}
+
+<div id="backend-message" class="message-container">
+    <div class="container">
+        <div class="title">Новое сообщение</div>
+        <div id="message-body" class="message">
+            <div class="text"></div>
+            <div class="params">
+                <div class="name param">
+                    <div class="container">Имя:</div>
+                    <div class="name-container value-container"></div>
+                </div>
+                <div class="phone param">
+                    <div class="container">Телефон:</div>
+                    <div class="phone-container value-container"></div>
+                </div>
+                <div class="tariff param">
+                    <div class="container">Тариф:</div>
+                    <div class="tariff-container value-container"></div>
+                </div>
+            </div>
+        </div>
+        <div id="close-message" class="button">Закрыть</div>
+    </div>
+</div>
+<div id="main" class="main-container">
+    <div class="header">
+        <a href="/" class="logo">Renat Coach</a>
+    </div>
+    <div class="underline"></div>
+    <form id="login-form" action="/login/" method="post" class="info" name="login-form">
+        <div class="entry">
+            <div class="title">Авторизация</div>
+            <div class="text" style="display: none">Вы можете выйти из аккаунта в любой момент</div>
+            <div class="inputs">
+                <div class="container">
+                    <label for="login">Логин:</label>
+                    <input id="login" name="login" type="text" placeholder="">
+                </div>
+                <div class="container">
+                    <label for="password">Пароль:</label>
+                    <input id="password" name="password" type="password" placeholder="">
+                </div>
+            </div>
+            <input type="submit" id="submit-button" class="button" value="Войти"/>
+            {% csrf_token %}
+        </div>
+    </form>
+</div>
+<div class="meta" style="display: none">
+    {{ is_logout | json_script:"logout-data" }}
+</div>
+
+<script type="text/javascript">
+    const logout = getDataFromMeta('logout');
+    const form = document.getElementById('login-form');
+
+    if (logout !== null) {
+        form.getElementsByClassName('title')[0].innerText = 'Выход из аккаунта';
+        const textElement = form.getElementsByClassName('text')[0];
+        textElement.style.display = 'flex';
+        textElement.style.fontSize = '18px';
+        textElement.style.marginBottom = '0';
+        form.getElementsByClassName('title')[0].style.fontSize = '26px';
+        form.getElementsByClassName('entry')[0].style.height = '20vh';
+        form.getElementsByClassName('inputs')[0].style.display = 'none';
+
+        const buttonElement = form.getElementsByClassName('button')[0];
+        buttonElement.value = 'Выйти из аккаунта';
+        buttonElement.setAttribute('type', 'button');
+        buttonElement.onclick = () => {
+            location.href = '/logout/'
+        }
+    }
+
+    function getDataFromMeta(name) {
+        const content = document.getElementById(name + '-data').textContent;
+        let data = null;
+
+        if (content) {
+            data = JSON.parse(content);
+
+            try {
+                data = JSON.parse(data);
+            } catch (_) {
+
+            }
+        }
+
+        if (!data) return null;
+        return data;
+    }
+</script>
+
+{% endblock main %}
+</body>
+</html>

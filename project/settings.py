@@ -121,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -151,7 +151,7 @@ EMAIL_HOST_USER = 'renat.coach@gmail.com'
 EMAIL_HOST_PASSWORD = 'A3qu8cj8Ls'
 EMAIL_USE_TLS = True
 
-EMAIL_RENAT = 'mandormant@gmail.com'
+EMAIL_RENAT = 'mandormant@gmail.com' if DEBUG else 'renik441@gmail.com'
 
 DEFAULT_FROM_EMAIL = 'renat.coach@gmail.com'
-DEFAULT_TO_EMAIL = 'mandormant@gmail.com'
+DEFAULT_TO_EMAIL = EMAIL_RENAT

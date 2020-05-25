@@ -60,7 +60,7 @@
             </svg>
         </div>
     </div>
-    <div class="nav">
+    <div id="mobile-nav" class="nav">
         <a data-to="about-lesson" class="tab close-menu">О тренировках</a>
         <a data-to="advantages" class="tab close-menu">Преимущества</a>
         <a data-to="prices" class="tab close-menu">Цены</a>
@@ -71,14 +71,30 @@
 <div id="backend-message" class="message-container">
     <div class="container">
         <div class="title">Новое сообщение</div>
-        <div id="message-body" class="message"></div>
+        <div id="message-body" class="message">
+            <div class="text"></div>
+            <div class="params">
+                <div class="name param">
+                    <div class="container">Имя:</div>
+                    <div class="name-container value-container"></div>
+                </div>
+                <div class="phone param">
+                    <div class="container">Телефон:</div>
+                    <div class="phone-container value-container"></div>
+                </div>
+                <div class="tariff param">
+                    <div class="container">Тариф:</div>
+                    <div class="tariff-container value-container"></div>
+                </div>
+            </div>
+        </div>
         <div id="close-message" class="button">Закрыть</div>
     </div>
 </div>
 <div id="main" class="main-container">
     <div class="header">
         <div class="logo">Renat Coach</div>
-        <div class="nav">
+        <div id="desktop-nav" class="nav">
             <a data-to="about-lesson" class="tab">О тренировках</a>
             <a data-to="advantages" class="tab">Преимущества</a>
             <a data-to="prices" class="tab">Цены</a>
@@ -114,6 +130,11 @@
                   fill="#000"></path>
         </svg>
     </a>
+</div>
+<div id="admin-panel" class="admin-panel">
+    <div class="title">Вы авторизованы</div>
+    <div class="text">Можете посмотреть список отправленных вам писем за всё время</div>
+    <a href="/emails/" class="button">Открыть письма</a>
 </div>
 <div id="about-lesson" class="about-lesson">
     <div class="title">О тренировках</div>
@@ -861,13 +882,22 @@
     <div class='bottom'>2019 Renat Coach, All right reserved.</div>
 </div>
 <div class="meta" style="display: none">
+    {{ message | json_script:"message-data" }}
+    {{ is_auth | json_script:"auth-data" }}
     {{ tariffs | json_script:"tariffs-data" }}
     {{ address_coords | json_script:"address-coords-data" }}
 </div>
 
 <script type="text/javascript">
+    let DEBUG = false;
+
     let mobileMenu = false;
     let isFormValid = false;
+    let formData = {
+        name: '',
+        phone: '',
+        tariff: -1,
+    }
 
     const colors = {
         blue: '#1771F1',
@@ -878,14 +908,102 @@
         lilac: '#A771FE',
     };
 
-    const coords = JSON.parse(JSON.parse(document.getElementById('address-coords-data').textContent));
-    const message = "{{ message }}";
-    let tariffs = JSON.parse(JSON.parse(document.getElementById('tariffs-data').textContent));
+    const coords = getDataFromMeta('address-coords')
+    const message = getDataFromMeta('message');
+    const is_auth = getDataFromMeta('auth');
+    let tariffs = getDataFromMeta('tariffs');
 
-    if (message) {
-        document.getElementById('backend-message').style.display = 'flex';
-        document.getElementById('message-body').innerHTML = message;
+    const phoneElement = document.getElementById('phone');
+    const nameElement = document.getElementById('name');
+    const tariffElement = document.getElementById('tariff');
+
+    const debugAutoInputChoices = [{
+        name: 'Филипп Киркоров',
+        phone: '+79113147230',
+        tariff: tariffs[Math.floor(Math.random() * tariffs.length)].number
+    }, {
+        name: 'Клава Кока',
+        phone: '+79020601357',
+        tariff: tariffs[Math.floor(Math.random() * tariffs.length)].number
+    }, {
+        name: 'Нурминский',
+        phone: '+74951326107',
+        tariff: tariffs[Math.floor(Math.random() * tariffs.length)].number
+    }, {
+        name: 'Андрей Малахов',
+        phone: '+79962325960',
+        tariff: tariffs[Math.floor(Math.random() * tariffs.length)].number
+    }, {
+        name: 'Милена Некрасова',
+        phone: '+375(29)385-62-07',
+        tariff: tariffs[Math.floor(Math.random() * tariffs.length)].number
+    }];
+    const debugAutoInputData = debugAutoInputChoices[Math.floor(Math.random() * debugAutoInputChoices.length)];
+
+    if (is_auth) {
+        document.getElementById('admin-panel').style.display = 'flex';
+        document.getElementById('desktop-nav').innerHTML += '<a href="/logout/" class="tab">Выйти</a>'
+        document.getElementById('mobile-nav').innerHTML += '<a href="/logout/" class="tab">Выйти</a>'
+    }
+
+    if (!(message === null)) {
+        if (DEBUG) {
+            console.log(`You have a message from server: [${message['text']}]`);
+        }
+
+        const backendMessage = document.getElementById('backend-message');
+        const messageBody = document.getElementById('message-body');
+        const textElement = messageBody.getElementsByClassName('text')[0];
+        const paramsElement = messageBody.getElementsByClassName('params')[0];
+
+        backendMessage.style.display = 'flex';
+        textElement.innerHTML = message['text'];
+
+        if (message['have_params']) {
+            if (message['name'])
+                paramsElement.getElementsByClassName('name-container')[0].innerHTML = message['name'];
+
+            if (message['phone'])
+                paramsElement.getElementsByClassName('phone-container')[0].innerHTML = message['phone'];
+
+            if (message['tariff'])
+                paramsElement.getElementsByClassName('tariff-container')[0].innerHTML = message['tariff'].short;
+
+        } else {
+            paramsElement.style.display = 'none';
+        }
+
         document.body.style.overflowY = 'hidden';
+
+        window.onload = function () {
+            setTimeout(() => window.scrollTo(0, 0), 500);
+        };
+
+        DEBUG = false;
+    }
+
+    function getDataFromMeta(name) {
+        const content = document.getElementById(name + '-data').textContent;
+        let data = null;
+
+        if (content) {
+            data = JSON.parse(content);
+
+            try {
+                data = JSON.parse(data);
+            } catch (_) {
+
+            }
+        }
+
+        if (!data) return null;
+        return data;
+    }
+
+    function validatePhone(phone) {
+        if (!phone) phone = '';
+        let result = phone.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
+        return !(result === null);
     }
 
     function switchMenu() {
@@ -911,7 +1029,6 @@
             let element = tariffs[tariffs.length - 1];
             tariffs = [element].concat(tariffs.slice(0, tariffs.length - 1));
         }
-
 
         if (tariffs[0].number + parts > tariffs.length) {
             rightArrow.classList.add('disabled');
@@ -960,6 +1077,10 @@
     }
 
     function scrollToElement(elementId, element) {
+        if (DEBUG) {
+            console.log(`Autoscroll to [${elementId}-element]...`);
+        }
+
         const scrollElement = document.getElementById(elementId);
         const fromMobileMenu = element.classList.contains('close-menu');
 
@@ -997,9 +1118,9 @@
         tariffs.map(price => {
             const prices = document.getElementById('prices-slider');
             const public_index = index > 3 ? 3 : index;
-            const warning = price.warning ? `<div class='warning' style="
-                    --warning-color: ${price.warning.color} !important;
-                    ">${price.warning.message}</div>` : "";
+            const warning = price.warning_message ? `<div class='warning' style="
+                    --warning-color: ${price.warning_color} !important;
+                    ">${price.warning_message}</div>` : "";
 
             prices.innerHTML += `<a href="${price.url}" class="price price-${public_index + 1}">
                             <div class="number">${price.number}</div>
@@ -1033,24 +1154,67 @@
         setTimeout(() => disableNotification(notification, number, false), 100);
     }
 
-    function checkFormValid() {
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
-        const tariff = parseInt(document.getElementById('tariff').value);
+    function checkFormValid(changeElements) {
         const submitButton = document.getElementById('submit-button');
 
-        if (name && phone && (tariff >= 0)) {
+        const name = document.getElementById('name').value;
+        const phone = phoneElement.value;
+        const tariff = parseInt(tariffElement.value);
+
+        const isLocalFormValid = name && phone && validatePhone(phone) && (tariff >= 0)
+
+        formData.name = name;
+        formData.phone = phone;
+        formData.tariff = tariff;
+
+        if (DEBUG) {
+            console.log(
+                `Checking validation form...\n\nName: ${name}
+                \nPhone: ${phone}\nTariff: ${tariff}\n\n`
+                + (isLocalFormValid ? '[VALID]' : '[WRONG]')
+            );
+        }
+
+        if (!validatePhone(phone)) {
+            if (changeElements) phoneElement.classList.add('error');
+            submitButton.classList.add('disabled');
+            isFormValid = false;
+
+        }
+
+        if (!name) {
+            if (changeElements) nameElement.classList.add('error');
+            submitButton.classList.add('disabled');
+            isFormValid = false;
+        }
+
+        if (tariff < 0) {
+            if (changeElements) tariffElement.classList.add('error');
+            submitButton.classList.add('disabled');
+            isFormValid = false;
+        }
+
+        if (isLocalFormValid) {
+            phoneElement.classList.remove('error');
+            nameElement.classList.remove('error');
+            tariffElement.classList.remove('error');
             submitButton.classList.remove('disabled');
             isFormValid = true;
 
-        } else {
-            submitButton.classList.add('disabled');
-            isFormValid = false;
         }
     }
 
     function submitForm() {
-        if (isFormValid) document.getElementById('mail-form').submit();
+        if (isFormValid) {
+            document.getElementById('phone').value = formData.phone;
+            document.getElementById('name').value = formData.name;
+            document.getElementById('tariff').value = formData.tariff;
+
+            document.getElementById('mail-form').submit();
+
+        } else {
+            checkFormValid(true);
+        }
     }
 
     document.getElementById('close-message').addEventListener('click', () => {
@@ -1058,9 +1222,9 @@
         document.body.style.overflowY = 'auto';
     });
 
-    document.getElementById('name').addEventListener('input', () => checkFormValid());
-    document.getElementById('phone').addEventListener('input', () => checkFormValid());
-    document.getElementById('tariff').addEventListener('change', () => checkFormValid());
+    document.getElementById('name').addEventListener('input', () => checkFormValid(false));
+    document.getElementById('phone').addEventListener('input', () => checkFormValid(false));
+    document.getElementById('tariff').addEventListener('change', () => checkFormValid(false));
 
     document.getElementById('mobile-menu-button').addEventListener('click', () => switchMenu());
 
@@ -1097,7 +1261,16 @@
     })
 
     updateSlider();
-    checkFormValid();
+
+    if (DEBUG) {
+        nameElement.value = debugAutoInputData.name;
+        phoneElement.value = debugAutoInputData.phone;
+        tariffElement.value = debugAutoInputData.tariff;
+
+        checkFormValid(true);
+
+        scrollToElement('contacts', document.getElementById('main'));
+    }
 
     ymaps.ready(init);
 

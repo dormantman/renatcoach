@@ -1,12 +1,14 @@
 import json
 import traceback
 
+from django.contrib.auth import authenticate, login, logout
 from django.core import mail
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views import View
 
 from project.settings import DEFAULT_FROM_EMAIL, DEFAULT_TO_EMAIL
+from web.utils import get_emails, get_tariffs, send_email
 
 DATA = dict(
     meta=dict(
@@ -36,8 +38,7 @@ DATA = dict(
             'title': 'Одна тренировка в группе',
             'short': 'Тренировка в гр. · 600 р.',
             'warning': {
-                'message': '<div class="price-warning">Популярный выбор <span '
-                           'class="beauty-number">👑</span></div>',
+                'message': '<div class="price-warning">Популярный выбор <span class="beauty-number">👑</span></div>',
                 'color': '#1771F1',
             },
             'price': '<span>600</span> рублей',
@@ -83,7 +84,8 @@ DATA = dict(
 class IndexView(View):
     def get(self, request):
         return render(request, 'index.html', {
-            'tariffs': json.dumps(DATA['tariffs'], ensure_ascii=False),
+            'is_auth': request.user.is_authenticated,
+            'tariffs': json.dumps(get_tariffs(), ensure_ascii=False),
             **DATA['meta']
         })
 
@@ -95,8 +97,14 @@ class MailView(View):
     def post(self, request):
         data = request.POST
 
-        message = f'Не удалось отправить заявку!<br>Попробуйте позже<br>' \
-                  f'или позвоните по номеру:<br>{DATA["meta"]["phone"]}'
+        message = {
+            'text': f'Не удалось отправить заявку!<br>Попробуйте позже<br> '
+                    f'или позвоните по номеру:<br>{DATA["meta"]["phone"]}',
+            'name': None,
+            'phone': None,
+            'tariff': None,
+            'have_params': False,
+        }
 
         try:
             name = data['name']
@@ -104,8 +112,13 @@ class MailView(View):
             tariff_id = int(data['tariff'])
             tariffs = DATA['tariffs']
 
+            message['name'] = name
+            message['phone'] = phone
+            message['have_params'] = True
+
             if name and phone and tariff_id in range(1, len(tariffs) + 1):
                 tariff = [element for element in tariffs if element['number'] == tariff_id][0]
+                message['tariff'] = tariff
 
                 connection = mail.get_connection()
                 connection.open()
@@ -117,20 +130,17 @@ class MailView(View):
                     'phone': phone
                 })
 
-                email = mail.EmailMessage(
+                status = send_email(
                     f'Заявка на запись от «{name}»',
                     message_body,
                     from_email=DEFAULT_FROM_EMAIL,
                     to=[DEFAULT_TO_EMAIL, ],
                     connection=connection,
+                    additional=message,
                 )
 
-                email.content_subtype = "html"
-
-                status = email.send()
-
                 if status:
-                    message = 'Заявка успешно отправлена!'
+                    message['text'] = 'Заявка успешно отправлена!'
 
                 connection.close()
 
@@ -139,6 +149,51 @@ class MailView(View):
 
         return render(request, 'index.html', {
             'message': message,
-            'tariffs': json.dumps(DATA['tariffs'], ensure_ascii=False),
+            'tariffs': json.dumps(get_tariffs(), ensure_ascii=False),
             **DATA['meta']
         })
+
+
+class EmailsView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/login/')
+
+        return render(request, 'emails.html', {
+            'emails': json.dumps(get_emails(), ensure_ascii=False),
+            **DATA['meta']
+        })
+
+
+class LoginView(View):
+    def get(self, request):
+        user = request.user
+
+        return render(request, 'login.html', {
+            'is_logout': user.is_authenticated,
+            **DATA['meta']
+        })
+
+    def post(self, request):
+        data = request.POST
+
+        user = authenticate(request=request, username=data['login'], password=data['password'])
+
+        if user:
+            login(request, user)
+            return redirect('/emails/')
+
+        return render(request, 'login.html', {
+            'is_logout': False,
+            **DATA['meta']
+        })
+
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('/login/')
+
+    def post(self, request):
+        logout(request)
+        return redirect('/login/')

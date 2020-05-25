@@ -1,0 +1,245 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="{{ meta_theme_color }}">
+    <meta name="application-name" content="{{ meta_site_title }}">
+    <meta name="apple-mobile-web-app-title" content="{{ meta_site_title }}">
+    <meta property="og:title" content="{{ meta_site_title }}">
+    <meta property="og:url">
+    <meta property="og:description" content="{{ meta_site_description }}">
+    <meta property="og:image" content="{{ meta_image }}">
+    <meta name="msapplication-config" content="none"/>
+    <link rel="shortcut icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="apple-touch-icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="icon" type="image/png" href="{{ meta_favicon }}">
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ meta_favicon }}"/>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{ meta_favicon }}"/>
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=60445215-6d3a-4f88-87fe-8d52b72e5bc9"
+            type="text/javascript">
+    </script>
+
+    <title>{{ title }}</title>
+
+    <link rel="stylesheet" type="text/css" href="/static/emails.css"/>
+
+    {% endblock head %}
+</head>
+<body>
+{% block main %}
+
+<div id="backend-message" class="message-container">
+    <div class="container">
+        <div class="title">Новое сообщение</div>
+        <div id="message-body" class="message">
+            <div class="text"></div>
+            <div class="params">
+                <div class="name param">
+                    <div class="container">Имя:</div>
+                    <div class="name-container value-container"></div>
+                </div>
+                <div class="phone param">
+                    <div class="container">Телефон:</div>
+                    <div class="phone-container value-container"></div>
+                </div>
+                <div class="tariff param">
+                    <div class="container">Тариф:</div>
+                    <div class="tariff-container value-container"></div>
+                </div>
+            </div>
+        </div>
+        <div id="close-message" class="button">Закрыть</div>
+    </div>
+</div>
+<div id="main" class="main-container">
+    <div class="header">
+        <a href="/" class="logo">Renat Coach</a>
+        <div class="nav">
+            <a data-to="/" class="tab">Главная</a>
+            <a data-to="/logout/" class="tab">Выйти</a>
+        </div>
+        <div class="nav-mobile">
+            <a data-to="/logout/" class="tab" style="color: #ffffff;">Выйти</a>
+        </div>
+    </div>
+    <div class="underline"></div>
+    <div class="title">Отправленные письма</div>
+    <div id="emails" class="emails-container"></div>
+</div>
+<div class="meta" style="display: none">
+    {{ emails | json_script:"emails-data" }}
+</div>
+
+<script type="text/javascript">
+    const emails = getDataFromMeta('emails');
+    const emailsElement = document.getElementById('emails');
+
+    function getDataFromMeta(name) {
+        const content = document.getElementById(name + '-data').textContent;
+        let data = null;
+
+        if (content) {
+            data = JSON.parse(content);
+
+            try {
+                data = JSON.parse(data);
+            } catch (_) {
+
+            }
+        }
+
+        if (!data) return null;
+        return data;
+    }
+
+    Array.from(document.getElementsByTagName('a')).map(element => {
+        const href = element.getAttribute('data-to');
+
+        if (href) {
+            element.addEventListener('click', () => {
+                location.href = href;
+            });
+        }
+    })
+
+    let dateFormat = function () {
+        var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
+            timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
+            timezoneClip = /[^-+\dA-Z]/g,
+            pad = function (val, len) {
+                val = String(val);
+                len = len || 2;
+                while (val.length < len) val = "0" + val;
+                return val;
+            };
+
+        // Regexes and supporting functions are cached through closure
+        return function (date, mask, utc) {
+            var dF = dateFormat;
+
+            // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
+            if (arguments.length == 1 && Object.prototype.toString.call(date) == "[object String]" && !/\d/.test(date)) {
+                mask = date;
+                date = undefined;
+            }
+
+            // Passing date through Date applies Date.parse, if necessary
+            date = date ? new Date(date) : new Date;
+            if (isNaN(date)) throw SyntaxError("invalid date");
+
+            mask = String(dF.masks[mask] || mask || dF.masks["default"]);
+
+            // Allow setting the utc argument via the mask
+            if (mask.slice(0, 4) == "UTC:") {
+                mask = mask.slice(4);
+                utc = true;
+            }
+
+            var _ = utc ? "getUTC" : "get",
+                d = date[_ + "Date"](),
+                D = date[_ + "Day"](),
+                m = date[_ + "Month"](),
+                y = date[_ + "FullYear"](),
+                H = date[_ + "Hours"](),
+                M = date[_ + "Minutes"](),
+                s = date[_ + "Seconds"](),
+                L = date[_ + "Milliseconds"](),
+                o = utc ? 0 : date.getTimezoneOffset(),
+                flags = {
+                    d: d,
+                    dd: pad(d),
+                    ddd: dF.i18n.dayNames[D],
+                    dddd: dF.i18n.dayNames[D + 7],
+                    m: m + 1,
+                    mm: pad(m + 1),
+                    mmm: dF.i18n.monthNames[m],
+                    mmmm: dF.i18n.monthNames[m + 12],
+                    yy: String(y).slice(2),
+                    yyyy: y,
+                    h: H % 12 || 12,
+                    hh: pad(H % 12 || 12),
+                    H: H,
+                    HH: pad(H),
+                    M: M,
+                    MM: pad(M),
+                    s: s,
+                    ss: pad(s),
+                    l: pad(L, 3),
+                    L: pad(L > 99 ? Math.round(L / 10) : L),
+                    t: H < 12 ? "a" : "p",
+                    tt: H < 12 ? "am" : "pm",
+                    T: H < 12 ? "A" : "P",
+                    TT: H < 12 ? "AM" : "PM",
+                    Z: utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
+                    o: (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+                    S: ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10]
+                };
+
+            return mask.replace(token, function ($0) {
+                return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
+            });
+        };
+    }();
+    dateFormat.masks = {
+        "default": "ddd mmm dd yyyy HH:MM:ss",
+        shortDate: "m/d/yy",
+        mediumDate: "mmm d, yyyy",
+        longDate: "mmmm d, yyyy",
+        fullDate: "dddd, mmmm d, yyyy",
+        shortTime: "h:MM TT",
+        mediumTime: "h:MM:ss TT",
+        longTime: "h:MM:ss TT Z",
+        isoDate: "yyyy-mm-dd",
+        isoTime: "HH:MM:ss",
+        isoDateTime: "yyyy-mm-dd'T'HH:MM:ss",
+        isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+    };
+    dateFormat.i18n = {
+        dayNames: [
+            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+        ],
+        monthNames: [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+        ]
+    };
+    Date.prototype.format = function (mask, utc) {
+        return dateFormat(this, mask, utc);
+    };
+
+
+    emails.map(email => {
+        let date = new Date(email.created).format("h:MM dd.mm.yyyy");
+        const tariffLabel = `<div class="tariff">
+            <div class="tab title">${email.tariff_data.title}</div>
+            <div class="tab price">${email.tariff_data.price}</div>
+        </div>`;
+
+        emailsElement.innerHTML += `<div class="email">
+            <div class="sub-element title">Письмо от «${email.name}»</div>
+            <div class="sub-element body">
+                <div class="tariff">По тарифу ${tariffLabel}</div>
+            </div>
+            <div class="sub-element phone">Котакты: <span><a href="tel:${email.phone}">${email.phone}</a></span></div>
+            <div class="created">${date}</div>
+            </div>`
+    })
+</script>
+
+{% endblock main %}
+</body>
+</html>

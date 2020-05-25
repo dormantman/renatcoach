@@ -200,7 +200,6 @@ input:focus {
     box-shadow: 0 6px 27px rgba(226, 3, 56, 0.32);
 }
 
-
 .main-container {
     display: flex;
     flex-flow: column;
@@ -210,8 +209,9 @@ input:focus {
     height: 100%;
     min-height: 100vh;
     position: relative;
-    background: linear-gradient(170deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+    background: linear-gradient(170deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.90));
     overflow: hidden;
+    padding-bottom: 80px;
 }
 
 .main-container::before {
@@ -299,16 +299,26 @@ input:focus {
 }
 
 .main-container > .info {
-    display: flex;
-    flex-flow: column;
-    transition: all 1s;
-    width: 80%;
-    max-width: 900px;
-    padding: 30px;
-    margin-top: 15vw;
+    width: 90%;
+    background: #000000aa;
+    max-width: 400px;
 }
 
-.main-container > .info > .title {
+.main-container > .info > .entry {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    transition: all 1s;
+    /*width: 100%;*/
+    padding: 30px;
+    margin-top: 15vw;
+    text-align: center;
+    background: #ffffff22;
+    height: 50vh;
+    border-radius: 16px;
+}
+
+.main-container > .info > .entry > .title {
     font-size: 44px;
     font-weight: 600;
     margin-bottom: 25px;
@@ -316,18 +326,86 @@ input:focus {
 }
 
 @media (max-width: 730px) {
-    .main-container > .info > .title {
+    .main-container > .info > .entry > .title {
         font-size: 36px;
     }
 }
 
-.main-container > .info > .text {
+.main-container > .info > .entry > .text {
     font-size: 28px;
     margin-bottom: 70px;
     color: white;
 }
 
-.main-container > .info > .button {
+.main-container > .info > .entry > .inputs {
+    margin: 25px;
+}
+
+.main-container > .info > .entry > .inputs > .container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    padding: 8px;
+    border: none;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.main-container > .info > .entry > .inputs > .container > label {
+    text-align: left;
+    width: 100%;
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.main-container > .info > .entry > .inputs > .container > input {
+    width: 100%;
+    border: none;
+    padding: 6px;
+    border-bottom: 1px solid #000000;
+    color: #000000;
+    font-size: 16px;
+    border-radius: 6px;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.main-container > .info > .entry > .inputs > .container > input::-webkit-input-placeholder {
+    color: #090812;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:-ms-input-placeholder {
+    color: #090812;
+}
+
+.main-container > .info > .entry > .inputs > .container > input::placeholder {
+    color: #090812;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:hover::-webkit-input-placeholder {
+    color: #090812aa;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:focus::-webkit-input-placeholder {
+    color: transparent;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:focus:-ms-input-placeholder {
+    color: transparent;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:focus::placeholder {
+    color: transparent;
+}
+
+.main-container > .info > .entry > .inputs > .container > input:focus:hover::-webkit-input-placeholder {
+    color: transparent;
+}
+
+.main-container > .info > .entry > .button {
     font-size: 20px;
     transition: color 0.2s, background-color 0.2s;
     padding: 10px 22px;
@@ -338,18 +416,30 @@ input:focus {
     cursor: pointer;
     font-weight: 600;
     width: fit-content;
+    margin: 0 auto;
+    margin-top: 20px;
+    outline: none;
+    border: none;
 }
 
-.main-container > .info > .button:hover {
+.main-container > .info > .entry > .button:hover {
     transition: color 0.01s, background-color 0.01s;
     background-color: rgba(226, 3, 56, 1);
     box-shadow: 0 6px 27px rgba(226, 3, 56, 0.32);
 }
 
-.main-container > .info > .button:active {
+.main-container > .info > .entry > .button:active {
     transition: color 0.01s, background-color 0.01s;
     background-color: rgba(226, 3, 56, 0.8);
     box-shadow: 0 6px 27px rgba(226, 3, 56, 0.32);
+}
+
+.main-container > .info > .entry > .button:hover::-ms-input-placeholde {
+    color: #090812aa;
+}
+
+.main-container > .info > .entry > .button:hover::placeholder {
+    color: #090812aa;
 }
 
 .main-container > .next {
@@ -378,61 +468,110 @@ input:focus {
     fill: white;
 }
 
-.admin-panel {
-    display: none;
-    flex-flow: column;
+.main-container > .title {
+    font-size: 30px;
+    color: #ffffff;
+    margin-top: 60px;
+}
+
+.emails-container {
+    display: flex;
+    justify-content: center;
     align-items: center;
+    flex-flow: column;
+    margin-top: 60px;
+    width: 90%;
+    max-width: 800px;
+}
+
+.emails-container > .entry {
+
+}
+
+.emails-container > .email {
+    display: flex;
+    flex-flow: column;
     justify-content: space-between;
     align-content: space-between;
-    min-height: 25vh;
-    padding: 40px 0;
-    background: #f7f7f7;
-    border-top: 7px solid #e20338;
-    border-bottom: 7px solid #e20338;
+    align-items: center;
+    margin: 10px;
+    margin-bottom: 25px;
+    height: 300px;
+    background: #f7f7f7ee;
+    padding: 30px 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 550px;
 }
 
-.admin-panel > .title {
+.emails-container > .email > .title {
     font-size: 26px;
+    color: #000000ee;
     font-weight: 600;
-    margin-top: 15px;
 }
 
-.admin-panel > .text {
+.emails-container > .email > .body {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    align-content: space-between;
+    align-items: center;
+    width: 60%;
+}
+
+.emails-container > .email > .body > * {
     font-size: 20px;
-    max-width: 350px;
+    color: #000000ee;
     text-align: center;
 }
 
-.admin-panel > .button {
-    margin-bottom: 15px;
+.emails-container > .email > .created {
+    position: relative;
+    bottom: -10px;
+    text-align: right;
+    width: 95%;
 }
 
-.admin-panel > .button {
+.emails-container > .email > .body > .tariff > .tariff {
+    text-align: center;
     font-size: 18px;
-    transition: color 0.2s, background-color 0.2s;
-    padding: 8px 20px;
-    color: white;
-    background-color: rgba(226, 3, 56, 0.8);
-    border-radius: 8px;
-    opacity: 1;
-    cursor: pointer;
+    margin-top: 10px;
+}
+
+.emails-container > .email > .body > .tariff > .tariff > .phone {
+
+}
+
+.emails-container > .email > .phone > span {
+    font-size: 24px;
     font-weight: 600;
-    width: fit-content;
-    margin-top: 20px;
-    outline: none;
-    border: none;
 }
 
-.admin-panel > .button:hover {
-    transition: color 0.01s, background-color 0.01s;
-    background-color: rgba(226, 3, 56, 1);
-    box-shadow: 0 6px 27px rgba(226, 3, 56, 0.32);
+.emails-container > .email > .body > .tariff > .tariff > .tab {
+    padding: 6px;
 }
 
-.admin-panel > .button:active {
-    transition: color 0.01s, background-color 0.01s;
-    background-color: rgba(226, 3, 56, 0.5);
-    box-shadow: 0 6px 27px rgba(226, 3, 56, 0.32);
+.emails-container > .email > .body > .tariff > .tariff > .title {
+    padding: 3px;
+    font-size: 22px;
+}
+
+.emails-container > .email > .body > .tariff > .tariff > .short {
+
+}
+
+.emails-container > .email > .body > .tariff > .tariff > .price {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.emails-container > .email > .body > .tariff > .tariff > .price > span {
+    font-weight: 600;
+    font-size: 26px;
+    background: linear-gradient(166.76deg, #24bff2 0%, #2458f2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    z-index: -1;
 }
 
 .about-lesson {
